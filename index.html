@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вопросы и ответы</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- навигация -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Вопросы и ответы</a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- поиск -->
+                <form class="d-flex me-auto ms-3" style="max-width: 400px;">
+                    <input class="form-control me-2" type="search" placeholder="Поиск вопросов..." aria-label="Search">
+                    <button class="btn btn-light" type="submit">Найти</button>
+                </form>
+                
+                <!-- пользователь -->
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <img src="./components/user-profile-pic.webp" class="rounded-circle me-1" alt="Аватар">
+                            Имя пользователя
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Мой профиль</a></li>
+                            <li><a class="dropdown-item" href="#">Настройки</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="login.html">Выйти</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Основная колонка -->
+            <main class="col-lg-9">
+                <div class="questions__title">
+                    <h2>New Questions</h2>
+                    <a href="#">Hot Questions</a>
+                </div>
+                <div class="questions__content">
+                    <div class="question__root">
+                        <div class="question__aside">
+                            <img src="./components/user-profile-pic.webp" alt="pic" class="question__image">
+                            <input type="number" value="5">
+                        </div>
+                        <div class="question__content">
+                            <h3 class="question__header">How to build a mean peak?</h3>
+                            <p class="question__description">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. 
+                                Ullam nulla laboriosam, tempore libero mollitia sunt omnis
+                                odit tenetur totam quam veritatis, sint atque facere laborum aperiam sapiente
+                                culpa dolorem vero.
+                            </p>
+                            <div class="question__footer">
+                                <a href="#" class="question__answers">answer (3)</a>
+                                <div class="question__tags">
+                                    <span class="question__subtitle">Tags:</span>
+                                    <div class="question__tags__list">
+                                        <a href="#">bender</a>
+                                        <a href="#">black-jack</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="question__root">
+                        <div class="question__aside">
+                            <img src="./components/user-profile-pic.webp" alt="pic" class="question__image">
+                            <input type="number" value="5">
+                        </div>
+                        <div class="question__content">
+                            <h3 class="question__header">How to build a mean peak?</h3>
+                            <p class="question__description">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. 
+                                Ullam nulla laboriosam, tempore libero mollitia sunt omnis
+                                odit tenetur totam quam veritatis, sint atque facere laborum aperiam sapiente
+                                culpa dolorem vero.
+                            </p>
+                            <div class="question__footer">
+                                <a href="#" class="question__answers">answer (3)</a>
+                                <div class="question__tags">
+                                    <span class="question__subtitle">Tags:</span>
+                                    <div class="question__tags__list">
+                                        <a href="#">bender</a>
+                                        <a href="#">black-jack</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="question__root">
+                        <div class="question__aside">
+                            <img src="./components/user-profile-pic.webp" alt="pic" class="question__image">
+                            <input type="number" value="5">
+                        </div>
+                        <div class="question__content">
+                            <h3 class="question__header">How to build a mean peak?</h3>
+                            <p class="question__description">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. 
+                                Ullam nulla laboriosam, tempore libero mollitia sunt omnis
+                                odit tenetur totam quam veritatis, sint atque facere laborum aperiam sapiente
+                                culpa dolorem vero.
+                            </p>
+                            <div class="question__footer">
+                                <a href="#" class="question__answers">answer (3)</a>
+                                <div class="question__tags">
+                                    <span class="question__subtitle">Tags:</span>
+                                    <div class="question__tags__list">
+                                        <a href="#">bender</a>
+                                        <a href="#">black-jack</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pagination">
+                    <a href="#" class="pagination__item">1</a>
+                    <a href="#" class="pagination__item">2</a>
+                    <a href="#" class="pagination__item">3</a>
+                    <a href="#" class="pagination__item">...</a>
+                    <a href="#" class="pagination__item">53</a>
+                </div>
+            </main>
+            
+            <!-- aside -->
+            <div class="col-lg-3">
+                <div class="sidebar-block">
+                    <h5>Популярные теги</h5>
+                    <div class="popular-tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">Django</span>
+                        <span class="tag">JavaScript</span>
+                        <span class="tag">Bootstrap</span>
+                        <span class="tag">HTML</span>
+                        <span class="tag">CSS</span>
+                        <span class="tag">Базы данных</span>
+                        <span class="tag">Алгоритмы</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-block">
+                    <h5>Лучшие пользователи</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <img src="./components/user-profile-pic.webp" class="rounded-circle me-1" alt="Аватар">
+                            <a href="#">user123</a> (205)
+                        </li>
+                        <li class="mb-2">
+                            <img src="./components/user-profile-pic.webp" class="rounded-circle me-1" alt="Аватар">
+                            <a href="#">python_dev</a> (189)
+                        </li>
+                        <li class="mb-2">
+                            <img src="./components/user-profile-pic.webp" class="rounded-circle me-1" alt="Аватар">
+                            <a href="#">web_master</a> (156)
+                        </li>
+                        <li class="mb-2">
+                            <img src="./components/user-profile-pic.webp" class="rounded-circle me-1" alt="Аватар">
+                            <a href="#">coder42</a> (134)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Вопросы и ответы</h5>
+                    <p>Здесь можно задавать вопросы и делиться знаниями.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Ссылки</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-light">О нас</a></li>
+                        <li><a href="#" class="text-light">Правила</a></li>
+                        <li><a href="#" class="text-light">Помощь</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Контакты</h5>
+                    <ul class="list-unstyled">
+                        <li>Email: info@example.com</li>
+                        <li>Телефон: +7 (123) 456-78-90</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
