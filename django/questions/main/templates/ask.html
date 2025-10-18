@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Задать вопрос - Вопросы и ответы{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Задать вопрос</h2>
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Заголовок</label>
+                            <input type="text" class="form-control" placeholder="Кратко опишите ваш вопрос">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Подробности вопроса</label>
+                            <textarea class="form-control" rows="8" placeholder="Опишите проблему подробно..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Теги</label>
+                            <input type="text" class="form-control" placeholder="укажите теги через запятую">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Опубликовать вопрос</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

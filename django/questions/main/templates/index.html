@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная – Вопросы и Ответы{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Основная колонка -->
+        <main class="col-lg-9">
+            <div class="questions__title">
+                <h2>New Questions</h2>
+                <a href="#" class="btn btn-outline-primary">Hot Questions</a>
+            </div>
+            <div class="questions__content">
+                <!-- Django цикл для генерации вопросов -->
+                {% for question in questions %}
+                <div class="question__root">
+                    <div class="question__aside">
+                        <img src="{% static 'components/user-profile-pic.webp' %}" alt="pic" class="question__image">
+                        <div class="question__votes">
+                            <button class="btn btn-sm btn-outline-success">▲</button>
+                            <span class="vote-count">{{ question.votes }}</span>
+                            <button class="btn btn-sm btn-outline-danger">▼</button>
+                        </div>
+                    </div>
+                    <div class="question__content">
+                        <h3 class="question__header">
+                            <a href="{% url 'question' question.id %}">
+                                {{ question.title }}
+                            </a>
+                        </h3>
+                        <p class="question__description">
+                            {{ question.description }}
+                        </p>
+                        <div class="question__footer">
+                            <a href="{% url 'question' question.id %}" class="question__answers">
+                                Ответов: {{ question.answers_count }}
+                            </a>
+                            <div class="question__tags">
+                                <span class="question__subtitle">Tags:</span>
+                                <div class="question__tags__list">
+                                    {% for tag in question.tags %}
+                                    <span class="badge bg-secondary">{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="pagination">
+                <a href="#" class="pagination__item">1</a>
+                <a href="#" class="pagination__item">2</a>
+                <a href="#" class="pagination__item">3</a>
+                <a href="#" class="pagination__item">...</a>
+                <a href="#" class="pagination__item">53</a>
+            </div>
+        </main>
+            
+        <!-- aside -->
+        <aside class="col-lg-3">
+            {% include 'includes/sidebar.html' %}
+        </aside>
+    </div>
+</div>
+{% endblock %}
