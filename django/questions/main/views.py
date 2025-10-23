@@ -3,94 +3,105 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
+import random
 
-def index(request):
-    questions = [
-        {
-            'id': 1,
-            'title': 'How to build a mean peak?',
-            'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam nulla laboriosam, tempore libero mollitia sunt omnis odit tenetur totam quam veritatis, sint atque facere laborum aperiam sapiente culpa dolorem vero.',
-            'votes': 5,
-            'answers_count': 3,
-            'tags': ['bender', 'black-jack'],
-            'author_avatar': 'components/user-profile-pic.webp'
-        },
-        {
-            'id': 2,
-            'title': 'Как настроить Django с PostgreSQL?',
-            'description': 'Пытаюсь настроить Django с PostgreSQL, но получаю ошибку подключения. В settings.py я указал следующие настройки...',
-            'votes': 8,
-            'answers_count': 2,
-            'tags': ['python', 'django', 'postgresql'],
-            'author_avatar': 'components/user-profile-pic.webp'
-        },
-        {
-            'id': 3,
-            'title': 'Лучшие практики работы с Bootstrap 5',
-            'description': 'Какие есть лучшие практики при работе с Bootstrap 5? Особенно интересует кастомизация компонентов...',
-            'votes': 12,
-            'answers_count': 5,
-            'tags': ['bootstrap', 'css', 'frontend'],
-            'author_avatar': 'components/user-profile-pic.webp'
-        }
+
+# Глобальная переменная для хранения вопросов
+GLOBAL_QUESTIONS = []
+
+def generate_random_questions(n = 100):
+    #Генерация случйных вопросов
+    titles = [
+        "Как работает Django ORM?",
+        "Почему Python считается интерпретируемым языком?",
+        "Что такое middleware в Django?",
+        "Как работает система шаблонов Django?",
+        "Какие отличия между List и Tuple в Python?",
+        "Как сделать авторизацию пользователя?",
+        "Как подключить Bootstrap к Django?",
+        "Что такое контекст шаблона?",
+        "Как работает render() в Django?",
+        "Как добавить статику в Django проект?"
     ]
 
+    tags_pool = [
+        ["python", "django"],
+        ["frontend", "css"],
+        ["postgresql", "database"],
+        ["bootstrap", "ui"],
+        ["auth", "users"],
+    ]
+
+    questions = []
+    for i in range(1, n + 1):
+        questions.append({
+            "id" : i,
+            "title" : random.choice(titles),
+            "description" : f"Это случайно сгенерированный вопрос №{i}."
+                            f"Значение случайного числа: {random.randint(1, 999)}."
+                            f"Описание предназначено для теста пагинации.",
+            "votes" : random.randint(1,30),
+            "answers_count" : random.randint(1,8),
+            "tags" : random.choice(tags_pool),
+            "author_avatar" : "components/user-profile-pic.webp",
+            "created_at": f"{random.randint(20, 50)} с.",
+            "answers" : []
+
+        })
+    return questions
+
+def index(request):
+    global GLOBAL_QUESTIONS
+
+    #Генерация 50 слуачных вопросов
+    if not GLOBAL_QUESTIONS:
+        GLOBAL_QUESTIONS = generate_random_questions(50)
+
+    sort_type = request.GET.get('sort', 'new')
+
+    if sort_type == 'hot':
+        questions_to_show = sorted(GLOBAL_QUESTIONS, key=lambda x: x["votes"], reverse=True)
+    else:
+        questions_to_show = sorted(GLOBAL_QUESTIONS, key=lambda x: x["id"], reverse=True)
+
+    paginator = Paginator(questions_to_show, 5)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'questions': questions
+        'page_obj' : page_obj,
+        'current_sort': sort_type,  # передаем текущий тип сортировки в шаблон
     }
     
     return render(request, "index.html", context)
 
 
 def question_detail(request, question_id):  # ← исправлено: question_id
-    questions_data = {
-        1: {
-            'title': 'How to build a mean peak?',
-            'description': 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam nulla laboriosam, tempore libero mollitia sunt omnis odit tenetur totam quam veritatis, sint atque facere laborum aperiam sapiente culpa dolorem vero.',
-            'votes': 5,
-            'answers_count': 3,
-            'tags': ['bender', 'black-jack'],
-            'author_avatar': 'components/user-profile-pic.webp'
-        },
-        2: {
-            'title': 'Как настроить Django с PostgreSQL?',
-            'description': 'Пытаюсь настроить Django с PostgreSQL, но получаю ошибку подключения. В settings.py я указал следующие настройки...',
-            'votes': 8,
-            'answers_count': 2,
-            'tags': ['python', 'django', 'postgresql'],
-            'author_avatar': 'components/user-profile-pic.webp'
-        },
-        3: {
-            'title': 'Лучшие практики работы с Bootstrap 5',
-            'description': 'Какие есть лучшие практики при работе с Bootstrap 5? Особенно интересует кастомизация компонентов...',
-            'votes': 12,
-            'answers_count': 5,
-            'tags': ['bootstrap', 'css', 'frontend'],
-            'author_avatar': 'components/user-profile-pic.webp'
-        }
-    }
 
-    if question_id in questions_data:
-        question_data = questions_data[question_id]
-    else:
-        question_data = {
-            'title': f'Вопрос #{question_id}',
-            'description': 'Этот вопрос еще не имеет описания. Будьте первым, кто добавит подробности!',
-            'votes': 0,
-            'answers_count': 0,
-            'tags': ['general'],
-        }
+    global GLOBAL_QUESTIONS
+    # генерируем такой же набор, как в index()
+    questions = generate_random_questions(40)
 
-    question = {
-        'id': question_id,
-        'title': question_data['title'],
-        'description': question_data['description'],
-        'votes': question_data['votes'],
-        'answers_count': question_data['answers_count'],
-        'tags': question_data['tags'],
-        'author_avatar': 'components/user-profile-pic.webp',
-        'created_at': '2 часа назад'
-    }
+    # пытаемся найти вопрос по id
+    question = None
+    for i in GLOBAL_QUESTIONS:
+        if i["id"] == question_id:
+            question = i
+            break
+
+    if not question:
+        question = {
+            "id": question_id,
+            "title": f"Вопрос #{question_id}",
+            "description": "Такого вопроса нет, но вы можете его создать!",
+            "votes": 0,
+            "answers_count": 0,
+            "tags": ["general"],
+            "author_avatar": "components/user-profile-pic.webp",
+            "created_at": "только что",
+            'answers' : []
+        }
 
     context = {
         'question' : question

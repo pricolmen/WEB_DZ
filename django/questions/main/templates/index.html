@@ -9,16 +9,26 @@
         <!-- Основная колонка -->
         <main class="col-lg-9">
             <div class="questions__title">
-                <h2>New Questions</h2>
-                <a href="#" class="btn btn-outline-primary">Hot Questions</a>
+                <h2>
+                    {% if current_sort == 'hot' %}
+                        Популярные вопросы
+                    {% else %}
+                        Новые вопросы
+                    {% endif %}
+                </h2>
+                {% if current_sort == 'new' %}
+                    <a href="?sort=hot{% if page_obj.number %}&page={{ page_obj.number }}{% endif %}" class="btn btn-outline-primary">Популярные вопросы</a>
+                {% else %}
+                    <a href="?sort=new{% if page_obj.number %}&page={{ page_obj.number }}{% endif %}" class="btn btn-outline-primary">Новые вопросы</a>
+                {% endif %}
             </div>
             <div class="questions__content">
                 <!-- Django цикл для генерации вопросов -->
-                {% for question in questions %}
+                {% for question in page_obj %}
                 <div class="question__root">
                     <div class="question__aside">
                         <img src="{% static 'components/user-profile-pic.webp' %}" alt="pic" class="question__image">
-                        <div class="question__votes">
+                        <div class="question__votes d-flex justify-content-center align-items-center gap-2">
                             <button class="btn btn-sm btn-outline-success">▲</button>
                             <span class="vote-count">{{ question.votes }}</span>
                             <button class="btn btn-sm btn-outline-danger">▼</button>
@@ -50,12 +60,17 @@
                 </div>
                 {% endfor %}
             </div>
-            <div class="pagination">
-                <a href="#" class="pagination__item">1</a>
-                <a href="#" class="pagination__item">2</a>
-                <a href="#" class="pagination__item">3</a>
-                <a href="#" class="pagination__item">...</a>
-                <a href="#" class="pagination__item">53</a>
+            <!--Пагинация-->
+            <div class="pagination mt-4 d-flex align-items-center gap-3">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary">« Назад</a>
+                {% endif %}
+
+                <span class="">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary">Дальше »</a>
+                {% endif %}
             </div>
         </main>
             
