@@ -36,8 +36,8 @@
             {% for answer in question.answers %}
             <div class="question__root mb-3">
                 <div class="question__aside">
-                    <img src="{% static answer.author_avatar %}" alt="Аватар" class="question__image">
-                    <div class="question__votes">
+                    <img src="{% static answer.answer_avatar %}" alt="Аватар" class="question__image">
+                    <div class="question__votes d-flex justify-content-center align-items-center gap-2">
                         <button class="btn btn-sm btn-outline-success">▲</button>
                         <span class="vote-count">{{ answer.votes }}</span>
                         <button class="btn btn-sm btn-outline-danger">▼</button>

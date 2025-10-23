@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 import random
+from django.http import HttpResponseNotFound
 
 
 # Глобальная переменная для хранения вопросов
@@ -33,8 +34,32 @@ def generate_random_questions(n = 100):
         ["auth", "users"],
     ]
 
+    answers_templates = [
+        "Отличный вопрос! Обычно это делается с помощью встроенных инструментов Django.",
+        "Можно использовать документацию Django — там есть подробный пример.",
+        "Попробуйте использовать команду `python manage.py makemigrations` и `migrate`.",
+        "Я бы предложил посмотреть в официальную документацию Python.",
+        "Убедитесь, что в настройках `INSTALLED_APPS` указано нужное приложение.",
+        "Это связано с тем, как Django управляет ORM транзакциями."
+    ]
+
+    authors = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank"]
+
     questions = []
     for i in range(1, n + 1):
+        #Генерируем случайное количество ответов
+        num_answers = random.randint(0,5)
+        answers = []
+        for j in range (num_answers):
+            answers.append({
+                "id": j + 1,
+                "content": random.choice(answers_templates),
+                "author": random.choice(authors),
+                "created_at": f"{random.randint(1, 59)} мин.",
+                "votes": random.randint(0, 5),
+                "answer_avatar" : "components/user-profile-pic.webp"
+            })
+
         questions.append({
             "id" : i,
             "title" : random.choice(titles),
@@ -42,11 +67,11 @@ def generate_random_questions(n = 100):
                             f"Значение случайного числа: {random.randint(1, 999)}."
                             f"Описание предназначено для теста пагинации.",
             "votes" : random.randint(1,30),
-            "answers_count" : random.randint(1,8),
+            "answers_count" : num_answers,
             "tags" : random.choice(tags_pool),
             "author_avatar" : "components/user-profile-pic.webp",
             "created_at": f"{random.randint(20, 50)} с.",
-            "answers" : []
+            "answers" : answers
 
         })
     return questions
@@ -80,31 +105,22 @@ def index(request):
 def question_detail(request, question_id):  # ← исправлено: question_id
 
     global GLOBAL_QUESTIONS
-    # генерируем такой же набор, как в index()
-    questions = generate_random_questions(40)
+    
 
     # пытаемся найти вопрос по id
-    question = None
-    for i in GLOBAL_QUESTIONS:
-        if i["id"] == question_id:
-            question = i
-            break
+    #question = None
+    #for i in GLOBAL_QUESTIONS:
+    #    if i["id"] == question_id:
+    #       question = i
+    #        break
+    question = next((q for q in GLOBAL_QUESTIONS if q["id"] == question_id), None)
 
     if not question:
-        question = {
-            "id": question_id,
-            "title": f"Вопрос #{question_id}",
-            "description": "Такого вопроса нет, но вы можете его создать!",
-            "votes": 0,
-            "answers_count": 0,
-            "tags": ["general"],
-            "author_avatar": "components/user-profile-pic.webp",
-            "created_at": "только что",
-            'answers' : []
-        }
+        return HttpResponseNotFound("Вопрос не найден")
 
     context = {
-        'question' : question
+        'question' : question,
+        'answers' : question["answers"]
     }
 
     return render(request, 'question.html', context)
