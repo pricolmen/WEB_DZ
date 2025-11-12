@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ question.title }} - Вопросы и ответы{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <main class="col-lg-9">
+            <!-- Вопрос -->
+            <div class="question__root mb-4">
+                <div class="question__aside">
+                    <img src="{% static 'components/user-profile-pic.webp' %}" alt="pic" class="question__image">
+                    <div class="question__votes d-flex justify-content-center align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-success">▲</button>
+                        <span class="vote-count">{{ question.votes }}</span>
+                        <button class="btn btn-sm btn-outline-danger">▼</button>
+                    </div>
+                </div>
+                <div class="question__content">
+                    <h1 class="question__header">{{ question.title }}</h1>
+                    <p class="question__description">{{ question.description }}</p>
+                    <div class="question__tags mb-3">
+                        {% for tag in question.tags %}
+                        <span class="badge bg-primary">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted">
+                        Задан {{ question.created_at }} назад
+                    </small>
+                </div>
+            </div>
+
+            <!-- Ответы -->
+            <h3>Ответы ({{ question.answers_count }})</h3>
+            {% for answer in question.answers %}
+            <div class="question__root mb-3">
+                <div class="question__aside">
+                    <img src="{% static answer.answer_avatar %}" alt="Аватар" class="question__image">
+                    <div class="question__votes d-flex justify-content-center align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-success">▲</button>
+                        <span class="vote-count">{{ answer.votes }}</span>
+                        <button class="btn btn-sm btn-outline-danger">▼</button>
+                    </div>
+                </div>
+                <div class="question__content">
+                    <p class="question__description">{{ answer.content }}</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="checkbox1">
+                        <label class="form-check-label" for="checkbox1">
+                            Правильный ответ
+                        </label>
+                    </div>
+                    <small class="text-muted">
+                        Ответ дан {{ answer.created_at }} назад
+                    </small>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Форма ответа -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5>Ваш ответ</h5>
+                    <form>
+                        <textarea class="form-control mb-3" rows="5" placeholder="Введите ваш ответ..."></textarea>
+                        <button type="submit" class="btn btn-primary">Отправить ответ</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <aside class="col-lg-3">
+            {% include 'includes/sidebar.html' %}
+        </aside>
+    </div>
+</div>
+{% endblock %}

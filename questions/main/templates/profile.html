@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль - Вопросы и ответы{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h3 class="card-title mb-3">Профиль</h3>
+            <div class="card">
+                <div class="card-body">
+                    
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img src="{% static 'components/default-avatar-profile-icon.jpg' %}"  alt="Аватар"
+                                class="img-fluid rounded-circle mb-3" 
+                                style="min-width: 150px;">
+                            <input type="file">
+                            <h4>{{ user.username|default:"example_user_name" }}</h4>
+                            <p class="text-muted">{{ user.email|default:"example@mail.ru" }}</p>
+                        </div>
+                        
+                        <div class="col-md-8 mt-5 text-center ">
+                            <p><strong>Имя:</strong> {{ user.first_name|default:"Не указано" }}</p>
+                            <p><strong>Фамилия:</strong> {{ user.last_name|default:"Не указано" }}</p>
+                            <p><strong>Дата регистрации:</strong> {{ user.date_joined|default:"Не указано" }}</p>
+                            
+                            <div class="mt-4">
+                                <a href="#" class="btn btn-primary">Редактировать профиль</a>
+                                <a href="{% url 'logout' %}" class="btn btn-outline-danger">Выйти</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
