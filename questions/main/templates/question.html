@@ -22,7 +22,7 @@
                     <p class="question__description">{{ question.description }}</p>
                     <div class="question__tags mb-3">
                         {% for tag in question.tags %}
-                        <span class="badge bg-primary">{{ tag }}</span>
+                        <a href="{% url 'questions_by_tag' tag %}" class="badge bg-primary">{{ tag }}</a>
                         {% endfor %}
                     </div>
                     <small class="text-muted">

@@ -2,35 +2,31 @@
 <div class="sidebar-block">
     <h5>Популярные теги</h5>
     <div class="popular-tags">
-        <span class="tag">Python</span>
-        <span class="tag">Django</span>
-        <span class="tag">JavaScript</span>
-        <span class="tag">Bootstrap</span>
-        <span class="tag">HTML</span>
-        <span class="tag">CSS</span>
-        <span class="tag">Базы данных</span>
-        <span class="tag">Алгоритмы</span>
+        <a href="{% url 'questions_by_tag' 'python' %}" class="tag">Python</a>
+        <a href="{% url 'questions_by_tag' 'django' %}" class="tag">Django</a>
+        <a href="{% url 'questions_by_tag' 'javascript' %}" class="tag">JavaScript</a>
+        <a href="{% url 'questions_by_tag' 'bootstrap' %}" class="tag">Bootstrap</a>
+        <a href="{% url 'questions_by_tag' 'html' %}" class="tag">HTML</a>
+        <a href="{% url 'questions_by_tag' 'css' %}" class="tag">CSS</a>
     </div>
 </div>
                 
-<div class="sidebar-block">
-    <h5>Лучшие пользователи</h5>
-    <ul class="list-unstyled">
-        <li class="mb-2">
-            <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-            <a href="#">user123</a> (205)
-        </li>
-        <li class="mb-2">
-            <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-            <a href="#">python_dev</a> (189)
-        </li>
-        <li class="mb-2">
-            <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-            <a href="#">web_master</a> (156)
-        </li>
-        <li class="mb-2">
-            <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-            <a href="#">coder42</a> (134)
-        </li>
-    </ul>
+<div class="sidebar-widget card">
+    <div class="card-body">
+        <h5 class="card-title">Лучшие пользователи</h5>
+        <ul class="list-unstyled">
+            <li class="mb-2">
+                <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
+                <a href="{% url 'user_profile' 'user123' %}">user123</a> (205)
+            </li>
+            <li class="mb-2">
+                <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
+                <a href="{% url 'user_profile' 'python_dev' %}">python_dev</a> (189)
+            </li>
+            <li class="mb-2">
+                <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
+                <a href="{% url 'user_profile' 'web_master' %}">web_master</a> (156)
+            </li>
+        </ul>
+    </div>
 </div>

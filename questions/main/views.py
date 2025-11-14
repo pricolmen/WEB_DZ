@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 import random
-from django.http import HttpResponseNotFound
+from django.http import Http404
 
 
 # Глобальная переменная для хранения вопросов
@@ -26,12 +26,17 @@ def generate_random_questions(n = 100):
         "Как добавить статику в Django проект?"
     ]
 
-    tags_pool = [
-        ["python", "django"],
-        ["frontend", "css"],
-        ["postgresql", "database"],
-        ["bootstrap", "ui"],
-        ["auth", "users"],
+    tags_combinations = [
+        ['python', 'django', 'orm'],
+        ['python', 'programming', 'basics'],
+        ['django', 'web', 'middleware'],
+        ['django', 'templates', 'frontend'],
+        ['python', 'list', 'tuple', 'data-structures'],
+        ['django', 'authentication', 'security'],
+        ['bootstrap', 'css', 'frontend'],
+        ['django', 'context', 'templates'],
+        ['django', 'views', 'render'],
+        ['django', 'static', 'files']
     ]
 
     answers_templates = [
@@ -68,7 +73,7 @@ def generate_random_questions(n = 100):
                             f"Описание предназначено для теста пагинации.",
             "votes" : random.randint(1,30),
             "answers_count" : num_answers,
-            "tags" : random.choice(tags_pool),
+            "tags" : random.choice(tags_combinations),
             "author_avatar" : "components/user-profile-pic.webp",
             "created_at": f"{random.randint(20, 50)} с.",
             "answers" : answers
@@ -103,27 +108,48 @@ def index(request):
 
 
 def question_detail(request, question_id):  # ← исправлено: question_id
-
     global GLOBAL_QUESTIONS
     
-
-    # пытаемся найти вопрос по id
-    #question = None
-    #for i in GLOBAL_QUESTIONS:
-    #    if i["id"] == question_id:
-    #       question = i
-    #        break
-    question = next((q for q in GLOBAL_QUESTIONS if q["id"] == question_id), None)
-
+    # Ищем вопрос в наших данных
+    question = None
+    for q in GLOBAL_QUESTIONS:
+        if q['id'] == question_id:
+            question = q
+            break
+    
+    # Если вопрос не найден - вызываем 404 ошибку
     if not question:
-        return HttpResponseNotFound("Вопрос не найден")
-
+        raise Http404("Вопрос не найден")  # ← ИСПРАВЛЕНО
+    
     context = {
-        'question' : question,
-        'answers' : question["answers"]
+        'question': question,
+        'answers': question.get("answers", [])
     }
 
     return render(request, 'question.html', context)
+
+
+def questions_by_tag(request, tag_name):
+    questions_with_tag=[]
+    for question in GLOBAL_QUESTIONS:
+        if tag_name in question['tags']:
+            questions_with_tag.append(question)
+    
+    # Сортируем по дате (новые первыми)
+    questions_with_tag.sort(key=lambda x: x['id'], reverse=True)
+
+    paginator = Paginator(questions_with_tag, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj' : page_obj,
+        'tag_name' : tag_name,
+        'questions_count' : len(questions_with_tag)
+    }
+
+    return render(request, 'questions_by_tag.html', context)
+
 
 
 @login_required
@@ -194,3 +220,28 @@ def profile(request):
 
 def ask_question(request):
     return render(request, 'ask.html')
+
+
+def user_profile(request, username):
+    """Страница профиля пользователя (заглушка)"""
+    # Пока просто заглушка, потом заменим на реальные данные из БД
+    context = {
+        'username' : username,
+        'user_data' : {
+            'rating' : 205,
+            'questions_count' : 45,
+            'answers_count' : 113,
+            'member_since' : '2021' 
+        }
+    }
+
+    return render(request, 'user_profile.html', context)
+
+def custom_404(request, exception):
+    return render(request, '404.html', status=404)
+
+def custom_400(request, exception):
+    return render(request, '400.html', status=400)
+
+def custom_500(request):
+    return render(request, '500.html', status=500)
