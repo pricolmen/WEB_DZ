@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Вопросы по тегу "{{ tag_name }}" - Вопросы и ответы{% endblock %}
+{% block title %}Вопросы по тегу "{{ tag.name }}" - Вопросы и ответы{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row">
         <main class="col-lg-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Вопросы по тегу: <span class="badge bg-primary">{{ tag_name }}</span></h2>
+                <h2>Вопросы по тегу: <span class="badge bg-primary">{{ tag.name }}</span></h2>
                 <span class="text-muted">Найдено вопросов: {{ questions_count }}</span>
             </div>
             
@@ -17,10 +17,10 @@
                     {% for question in page_obj %}
                     <div class="question__root">
                         <div class="question__aside">
-                            <img src="{% static question.author_avatar %}" alt="Аватар" class="question__image">
+                            <img src="{% static 'components/user-profile-pic.webp' %}" alt="Аватар" class="question__image">
                             <div class="question__votes">
                                 <button class="btn btn-sm btn-outline-success">▲</button>
-                                <span class="vote-count">{{ question.votes }}</span>
+                                <span class="vote-count">{{ question.rating }}</span>
                                 <button class="btn btn-sm btn-outline-danger">▼</button>
                             </div>
                         </div>
@@ -28,19 +28,22 @@
                             <h3 class="question__header">
                                 <a href="{% url 'question' question.id %}">{{ question.title }}</a>
                             </h3>
-                            <p class="question__description">{{ question.description }}</p>
+                            <p class="question__description">{{ question.content|truncatewords:30 }}</p>
                             <div class="question__footer">
                                 <a href="{% url 'question' question.id %}" class="question__answers">
-                                    answers ({{ question.answers_count }})
+                                    answers ({{ question.answer_set.count }})
                                 </a>
                                 <div class="question__tags">
                                     <span class="question__subtitle">Теги:</span>
                                     <div class="question__tags__list">
-                                        {% for tag in question.tags %}
-                                        <a href="{% url 'questions_by_tag' tag %}" class="badge bg-secondary">{{ tag }}</a>
+                                        {% for tag in question.tags.all %}
+                                        <a href="{% url 'questions_by_tag' tag.name %}" class="badge bg-secondary">{{ tag.name }}</a>
                                         {% endfor %}
                                     </div>
                                 </div>
+                                <small class="text-muted">
+                                    Задан {{ question.created_at|timesince }} назад 
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -48,21 +51,21 @@
                 </div>
                 
                 <!-- Пагинация -->
-            <div class="pagination mt-4 d-flex align-items-center gap-3">
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary">« Назад</a>
-                {% endif %}
+                <div class="pagination mt-4 d-flex align-items-center gap-3">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary">« Назад</a>
+                    {% endif %}
 
-                <span class="">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                    <span class="">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
 
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary">Дальше »</a>
-                {% endif %}
-            </div>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary">Дальше »</a>
+                    {% endif %}
+                </div>
             {% else %}
                 <div class="alert alert-info">
                     <h4>Вопросов не найдено</h4>
-                    <p>Пока нет вопросов с тегом "{{ tag_name }}".</p>
+                    <p>Пока нет вопросов с тегом "{{ tag.name }}".</p>
                     <a href="{% url 'index' %}" class="btn btn-primary">Вернуться на главную</a>
                 </div>
             {% endif %}

@@ -13,38 +13,38 @@
                     <img src="{% static 'components/user-profile-pic.webp' %}" alt="pic" class="question__image">
                     <div class="question__votes d-flex justify-content-center align-items-center gap-2">
                         <button class="btn btn-sm btn-outline-success">▲</button>
-                        <span class="vote-count">{{ question.votes }}</span>
+                        <span class="vote-count">{{ question.rating }}</span>
                         <button class="btn btn-sm btn-outline-danger">▼</button>
                     </div>
                 </div>
                 <div class="question__content">
                     <h1 class="question__header">{{ question.title }}</h1>
-                    <p class="question__description">{{ question.description }}</p>
+                    <p class="question__description">{{ question.content|linebreaks }}</p>
                     <div class="question__tags mb-3">
-                        {% for tag in question.tags %}
-                        <a href="{% url 'questions_by_tag' tag %}" class="badge bg-primary">{{ tag }}</a>
+                        {% for tag in question.tags.all %}
+                        <a href="{% url 'questions_by_tag' tag %}" class="badge bg-primary">{{ tag.name }}</a>
                         {% endfor %}
                     </div>
                     <small class="text-muted">
-                        Задан {{ question.created_at }} назад
+                        Задан {{ question.created_at|timesince }} назад пользователем {{ question.author.username }}
                     </small>
                 </div>
             </div>
 
             <!-- Ответы -->
-            <h3>Ответы ({{ question.answers_count }})</h3>
-            {% for answer in question.answers %}
+            <h3>Ответы ({{ page_obj.paginator.count }})</h3>
+            {% for answer in page_obj %}
             <div class="question__root mb-3">
                 <div class="question__aside">
-                    <img src="{% static answer.answer_avatar %}" alt="Аватар" class="question__image">
+                    <img src="{% static 'components/user-profile-pic.webp' %}" alt="Аватар" class="question__image">
                     <div class="question__votes d-flex justify-content-center align-items-center gap-2">
                         <button class="btn btn-sm btn-outline-success">▲</button>
-                        <span class="vote-count">{{ answer.votes }}</span>
+                        <span class="vote-count">{{ answer.rating }}</span>
                         <button class="btn btn-sm btn-outline-danger">▼</button>
                     </div>
                 </div>
                 <div class="question__content">
-                    <p class="question__description">{{ answer.content }}</p>
+                    <p class="question__description">{{ answer.content|linebreaks }}</p>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="checkbox1">
                         <label class="form-check-label" for="checkbox1">
@@ -52,7 +52,7 @@
                         </label>
                     </div>
                     <small class="text-muted">
-                        Ответ дан {{ answer.created_at }} назад
+                        Ответ дан {{ answer.created_at|timesince }} назад пользователем {{ answer.author.username }}
                     </small>
                 </div>
             </div>

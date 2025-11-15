@@ -2,12 +2,9 @@
 <div class="sidebar-block">
     <h5>Популярные теги</h5>
     <div class="popular-tags">
-        <a href="{% url 'questions_by_tag' 'python' %}" class="tag">Python</a>
-        <a href="{% url 'questions_by_tag' 'django' %}" class="tag">Django</a>
-        <a href="{% url 'questions_by_tag' 'javascript' %}" class="tag">JavaScript</a>
-        <a href="{% url 'questions_by_tag' 'bootstrap' %}" class="tag">Bootstrap</a>
-        <a href="{% url 'questions_by_tag' 'html' %}" class="tag">HTML</a>
-        <a href="{% url 'questions_by_tag' 'css' %}" class="tag">CSS</a>
+        {% for tag in popular_tags %}
+            <a href="{% url 'questions_by_tag' tag.name %}" class="tag">{{ tag.name }}</a>
+        {% endfor %}
     </div>
 </div>
                 
@@ -15,18 +12,12 @@
     <div class="card-body">
         <h5 class="card-title">Лучшие пользователи</h5>
         <ul class="list-unstyled">
+            {% for user in best_users %}
             <li class="mb-2">
                 <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-                <a href="{% url 'user_profile' 'user123' %}">user123</a> (205)
+                <a href="{% url 'user_profile' user.username %}">{{ user.username }}</a> ({{ user.rating }})
             </li>
-            <li class="mb-2">
-                <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-                <a href="{% url 'user_profile' 'python_dev' %}">python_dev</a> (189)
-            </li>
-            <li class="mb-2">
-                <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-                <a href="{% url 'user_profile' 'web_master' %}">web_master</a> (156)
-            </li>
+            {% endfor %}
         </ul>
     </div>
 </div>

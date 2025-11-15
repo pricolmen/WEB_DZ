@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 import random
 from django.http import Http404
+from .models import Question, Tag, Answer
 
 
 # Глобальная переменная для хранения вопросов
@@ -245,3 +246,54 @@ def custom_400(request, exception):
 
 def custom_500(request):
     return render(request, '500.html', status=500)
+
+
+def paginate(objects_list, request, per_page=10):
+    paginator = Paginator(objects_list, per_page)
+    page_number = request.GET.get('page')
+    return paginator.get_page(page_number)
+
+def index(request):
+    sort_type = request.GET.get('sort', 'new')  # получаем параметр сортировки
+    
+    if sort_type == 'hot':
+        questions = Question.objects.best_questions()
+    else:
+        questions = Question.objects.new_questions()
+    
+    page_obj = paginate(questions, request)
+    
+    return render(request, 'index.html', {
+        'page_obj': page_obj,
+        'current_sort': sort_type
+    })
+
+def hot_questions(request):
+    questions = Question.objects.best_questions()
+    page_obj = paginate(questions, request)
+    return render(request, 'index.html', {
+        'page_obj': page_obj,
+        'current_sort': 'hot'
+    })
+
+def questions_by_tag(request, tag_name):
+    """Вопросы по тегу"""
+    tag = get_object_or_404(Tag, name=tag_name)
+    questions = Question.objects.questions_by_tag(tag_name)
+    page_obj = paginate(questions, request)
+    
+    context = {
+        'page_obj': page_obj,
+        'tag': tag,  # ← передаем объект тега, а не только имя
+        'questions_count': questions.count()
+    }
+    return render(request, 'questions_by_tag.html', context)
+
+def question_detail(request, question_id):
+    question = get_object_or_404(Question, id=question_id)
+    answers = Answer.objects.filter(question=question).order_by('-rating', '-created_at')
+    page_obj = paginate(answers, request, per_page=5)
+    return render(request, 'question.html', {
+        'question': question,
+        'page_obj': page_obj
+    })
