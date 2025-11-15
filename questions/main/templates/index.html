@@ -29,9 +29,9 @@
                     <div class="question__aside">
                         <img src="{% static 'components/user-profile-pic.webp' %}" alt="pic" class="question__image">
                         <div class="question__votes d-flex justify-content-center align-items-center gap-2">
-                            <button class="btn btn-sm btn-outline-success">▲</button>
-                            <span class="vote-count">{{ question.votes }}</span>
-                            <button class="btn btn-sm btn-outline-danger">▼</button>
+                            <button class="btn btn-sm btn-outline-success" id="buttonLike">▲</button>
+                            <span class="vote-count" id="counterVotes">{{ question.rating }}</span>
+                            <button class="btn btn-sm btn-outline-danger" id="buttonDislike">▼</button>
                         </div>
                     </div>
                     <div class="question__content">
@@ -41,20 +41,23 @@
                             </a>
                         </h3>
                         <p class="question__description">
-                            {{ question.description }}
+                            {{ question.content|truncatewords:30 }}
                         </p>
                         <div class="question__footer">
                             <a href="{% url 'question' question.id %}" class="question__answers">
-                                Ответов: {{ question.answers_count }}
+                                Ответов: {{ question.answer_set.count }}
                             </a>
                             <div class="question__tags">
                                 <span class="question__subtitle">Tags:</span>
                                 <div class="question__tags__list">
-                                    {% for tag in question.tags %}
-                                    <span class="badge bg-secondary">{{ tag }}</span>
+                                    {% for tag in question.tags.all %}
+                                    <a href="{% url 'questions_by_tag' tag %}" class="badge bg-secondary">{{ tag.name }}</a>
                                     {% endfor %}
                                 </div>
                             </div>
+                            <small class="text-muted">
+                                Задан {{ question.created_at|timesince }} назад
+                            </small>
                         </div>
                     </div>
                 </div>
