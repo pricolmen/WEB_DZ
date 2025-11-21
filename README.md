@@ -12,6 +12,7 @@ Django Questions & Answers Platform
 
 
 git clone https://github.com/pricolmen/WEB_DZ
+
 cd questions
 
 Запустите проект одной командой
