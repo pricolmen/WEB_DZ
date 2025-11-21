@@ -11,7 +11,7 @@ Django Questions & Answers Platform
 Клонируйте репозиторий
 
 
-git clone https://github.com/pricolmen/WEB_DZ
+git clone -b dev https://github.com/pricolmen/WEB_DZ
 
 cd questions
 
