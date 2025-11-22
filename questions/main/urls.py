@@ -4,6 +4,7 @@ from . import views
 
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('', views.index, name='index'),
     path('question/<int:question_id>/', views.question_detail, name='question'),
     path('ask/', views.ask_question, name='ask'),
