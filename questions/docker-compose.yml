@@ -4,7 +4,10 @@ services:
   web:
     build: .
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      sh -c "sleep 10 &&  # ← ДОБАВЬТЕ ЗАДЕРЖКУ 10 секунд
+             python manage.py migrate &&
+             python manage.py fill_db 500 &&
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
@@ -13,7 +16,7 @@ services:
       - db
 
   db:
-    image: postgres:13
+    image: postgres:16
     environment:
       - POSTGRES_DB=mydjango_db
       - POSTGRES_USER=postgres
