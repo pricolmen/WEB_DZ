@@ -108,7 +108,7 @@ def index(request):
     return render(request, "index.html", context)
 
 
-def question_detail(request, question_id):  # ← исправлено: question_id
+def question_detail(request, question_id):  # исправлено: question_id
     global GLOBAL_QUESTIONS
     
     # Ищем вопрос в наших данных
@@ -118,9 +118,9 @@ def question_detail(request, question_id):  # ← исправлено: question
             question = q
             break
     
-    # Если вопрос не найден - вызываем 404 ошибку
+    # Если вопрос не найден вызываем 404 ошибку
     if not question:
-        raise Http404("Вопрос не найден")  # ← ИСПРАВЛЕНО
+        raise Http404("Вопрос не найден")  #ИСПРАВЛЕНО
     
     context = {
         'question': question,
