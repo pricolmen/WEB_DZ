@@ -25,6 +25,12 @@ urlpatterns = [
     path("", include("main.urls"),)
 ]
 
+# Debug Toolbar URLs
+if settings.DEBUG:
+    urlpatterns = [
+        path('__debug__/', include('debug_toolbar.urls')),
+    ] + urlpatterns
+
 # Обработчики ошибок
 handler404 = 'main.views.custom_404'
 handler500 = 'main.views.custom_500' 
