@@ -5,6 +5,7 @@ import random
 from main.models import Profile, Question, Answer, Tag, QuestionLike, AnswerLike
 from django.db import transaction
 from django.db.models import Max
+from django.db.models import Sum, Count
 
 class Command(BaseCommand):
     help = 'Fill database with sample data'
@@ -205,6 +206,25 @@ class Command(BaseCommand):
             if answer_likes:
                 AnswerLike.objects.bulk_create(answer_likes, batch_size=2000)
             self.stdout.write(self.style.SUCCESS(f'✅ Created {len(answer_likes)} answer likes'))
+
+            for user in User.objects.all():
+
+                profile = Profile.objects.get(user=user)
+
+                question_rating = Question.objects.filter(
+                    author=user
+                ).aggregate(total=Sum('rating'))['total'] or 0
+
+                answer_rating = Answer.objects.filter(
+                    author=user
+                ).aggregate(total=Sum('rating'))['total'] or 0
+                
+                answers_count = Answer.objects.filter(author=user).count()
+                
+                profile.rating = question_rating + answer_rating
+                profile.answers_count = answers_count
+                profile.save()
+
         
         # Финальная статистика
         self.stdout.write(self.style.SUCCESS('🎉 Database filled successfully!'))

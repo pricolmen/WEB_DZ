@@ -1,13 +1,30 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.db.models import Sum
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    rating = models.IntegerField(default=0)  # Добавляем рейтинг
+    answers_count = models.IntegerField(default=0)  # Добавляем количество ответов
     
     def __str__(self):
-        return f"Profile of {self.user.username}"
+        return f"Profile of {self.user.username} - Rating: {self.rating}"
+    
+    def update_rating(self):
+        answers_rating = Answer.objects.filter(author=self.user).aggregate(
+            total=models.Sum('rating')
+        )['total'] or 0
+
+        self.answers_count = Answer.objects.filter(author=self.user).count()
+        
+        self.rating = answers_rating
+        self.save()
+        return self.rating
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -98,3 +115,57 @@ class AnswerLike(models.Model):
         self.clean()
         super().save(*args, **kwargs)
         self.answer.update_rating()
+
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=Question)
+@receiver(post_save, sender=Answer)
+@receiver(post_delete, sender=Question)
+@receiver(post_delete, sender=Answer)
+@receiver(post_save, sender=QuestionLike)
+@receiver(post_save, sender=AnswerLike)
+@receiver(post_delete, sender=QuestionLike)
+@receiver(post_delete, sender=AnswerLike)
+def update_user_profile_rating(sender, instance, **kwargs):
+    from django.db.models import Sum
+    
+    # Определяем пользователя для обновления
+    if hasattr(instance, 'author'):
+        user = instance.author
+    elif isinstance(instance, QuestionLike):
+        user = instance.question.author
+    elif isinstance(instance, AnswerLike):
+        user = instance.answer.author
+    else:
+        return
+    
+    # Обновляем рейтинг
+    try:
+        profile = Profile.objects.get(user=user)
+        
+        # Считаем рейтинг вопросов
+        question_rating = Question.objects.filter(
+            author=user
+        ).aggregate(total=Sum('rating'))['total'] or 0
+        
+        # Считаем рейтинг ответов
+        answer_rating = Answer.objects.filter(
+            author=user
+        ).aggregate(total=Sum('rating'))['total'] or 0
+        
+        # Считаем количество ответов
+        answers_count = Answer.objects.filter(author=user).count()
+        
+        # Обновляем профиль
+        profile.rating = question_rating + answer_rating
+        profile.answers_count = answers_count
+        profile.save()
+        
+    except Profile.DoesNotExist:
+        # Создаем профиль, если его нет
+        Profile.objects.create(user=user)

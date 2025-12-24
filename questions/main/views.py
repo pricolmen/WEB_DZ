@@ -239,10 +239,10 @@ def user_profile(request, username):
     return render(request, 'user_profile.html', context)
 
 def custom_404(request, exception):
-    return render(request, '404.html', status=404)
+    return render(request, '404.html', {"exception": exception}, status=404)
 
 def custom_400(request, exception):
-    return render(request, '400.html', status=400)
+    return render(request, '400.html', {"exception": exception}, status=400)
 
 def custom_500(request):
     return render(request, '500.html', status=500)
