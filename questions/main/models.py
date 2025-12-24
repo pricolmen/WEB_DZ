@@ -11,6 +11,7 @@ class Profile(models.Model):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     rating = models.IntegerField(default=0)  # Добавляем рейтинг
     answers_count = models.IntegerField(default=0)  # Добавляем количество ответов
+    nickname = models.CharField(max_length=50, blank=True, null=True)
     
     def __str__(self):
         return f"Profile of {self.user.username} - Rating: {self.rating}"
@@ -25,6 +26,11 @@ class Profile(models.Model):
         self.rating = answers_rating
         self.save()
         return self.rating
+    
+    def save(self, *args, **kwargs):
+        if not self.nickname:
+            self.nickname = self.user.username
+        super().save(*args, **kwargs)
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)

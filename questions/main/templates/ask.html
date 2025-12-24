@@ -1,3 +1,4 @@
+<!-- templates/ask.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -7,35 +8,60 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-title">Задать вопрос</h2>
-                    <form>
-                        <div class="mb-3">
-                            <label class="form-label">Заголовок</label>
-                            <input type="text" class="form-control" placeholder="Кратко опишите ваш вопрос">
-                            <span class="text-danger small mt-1">
-                                Заголовок вопроса обязателен для заполнения
-                            </span>
+            <h2 class="mb-4">Задать вопрос</h2>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                        {{ form.title.label }}
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="text-danger">
+                            {% for error in form.title.errors %}
+                                {{ error }}
+                            {% endfor %}
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Подробности вопроса</label>
-                            <textarea class="form-control" rows="8" placeholder="Опишите проблему подробно..."></textarea>
-                            <span class="text-danger small mt-1">
-                                Текст вопроса обязателен для заполнения
-                            </span>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Теги</label>
-                            <input type="text" class="form-control" placeholder="укажите теги через запятую">
-                            <span class="text-danger small mt-1">
-                                Укажите хотя бы один тег
-                            </span>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Опубликовать вопрос</button>
-                    </form>
+                    {% endif %}
                 </div>
-            </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.content.id_for_label }}" class="form-label">
+                        {{ form.content.label }} 
+                    </label>
+                    {{ form.content }}
+                    {% if form.content.errors %}
+                        <div class="text-danger">
+                            {% for error in form.content.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">Опишите проблему подробно</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="{{ form.tags.id_for_label }}" class="form-label">
+                        {{ form.tags.label }} 
+                    </label>
+                    {{ form.tags }}
+                    {% if form.tags.errors %}
+                        <div class="text-danger">
+                            {% for error in form.tags.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">{{ form.tags.help_text }}</div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Опубликовать вопрос</button>
+                    <a href="{% url 'index' %}" class="btn btn-outline-secondary">Отмена</a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
