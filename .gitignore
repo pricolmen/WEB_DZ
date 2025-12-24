@@ -31,3 +31,8 @@ dist/
 
 # --- Jupyter / IPython ---
 .ipynb_checkpoints/
+
+# Базы данных
+*.sqlite3
+*.db
+*.sqlite

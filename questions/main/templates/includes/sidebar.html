@@ -1,36 +1,25 @@
 {% load static %}
-<div class="sidebar-block">
-    <h5>Популярные теги</h5>
-    <div class="popular-tags">
-        <span class="tag">Python</span>
-        <span class="tag">Django</span>
-        <span class="tag">JavaScript</span>
-        <span class="tag">Bootstrap</span>
-        <span class="tag">HTML</span>
-        <span class="tag">CSS</span>
-        <span class="tag">Базы данных</span>
-        <span class="tag">Алгоритмы</span>
+<div class="sticky-top">
+    <div class="sidebar-block">
+        <h5>Популярные теги</h5>
+        <div class="popular-tags">
+            {% for tag in popular_tags %}
+                <a href="{% url 'questions_by_tag' tag.name %}" class="tag">{{ tag.name }}</a>
+            {% endfor %}
+        </div>
     </div>
-</div>
-                
-<div class="sidebar-block">
-    <h5>Лучшие пользователи</h5>
-    <ul class="list-unstyled">
-        <li class="mb-2">
-            <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-            <a href="#">user123</a> (205)
-        </li>
-        <li class="mb-2">
-            <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-            <a href="#">python_dev</a> (189)
-        </li>
-        <li class="mb-2">
-            <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-            <a href="#">web_master</a> (156)
-        </li>
-        <li class="mb-2">
-            <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-            <a href="#">coder42</a> (134)
-        </li>
-    </ul>
+                    
+    <div class="sidebar-widget card">
+        <div class="card-body">
+            <h5 class="card-title">Лучшие пользователи</h5>
+            <ul class="list-unstyled">
+                {% for user in best_users %}
+                <li class="mb-2">
+                    <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
+                    <a href="{% url 'user_profile' user.username %}">{{ user.username }}</a> ({{ user.rating }})
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 </div>
