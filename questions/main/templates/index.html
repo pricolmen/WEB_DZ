@@ -26,12 +26,24 @@
                 <!-- Django цикл для генерации вопросов -->
                 {% for question in page_obj %}
                 <div class="question__root">
-                    <div class="question__aside">
-                        <img src="{% static 'components/user-profile-pic.webp' %}" alt="pic" class="question__image">
+                    <div class="question__aside" style="min-width: 100px">
+                        <img src="{{ user.profile.avatar.url }}" alt="pic" class="question__image">
                         <div class="question__votes d-flex justify-content-center align-items-center gap-2">
-                            <button class="btn btn-sm btn-outline-success" id="buttonLike">▲</button>
-                            <span class="vote-count" id="counterVotes">{{ question.rating }}</span>
-                            <button class="btn btn-sm btn-outline-danger" id="buttonDislike">▼</button>
+                            <button class="btn btn-sm btn-outline-success like-btn" 
+                                    data-type="question" 
+                                    data-id="{{ question.id }}"
+                                    data-value="1"
+                                    {% if not user.is_authenticated or user == question.author %}disabled{% endif %}>
+                                ▲
+                            </button>
+                            <span class="vote-count" id="question-rating-{{ question.id }}">{{ question.rating }}</span>
+                            <button class="btn btn-sm btn-outline-danger dislike-btn"
+                                    data-type="question"
+                                    data-id="{{ question.id }}"
+                                    data-value="-1"
+                                    {% if not user.is_authenticated or user == question.author %}disabled{% endif %}>
+                                ▼
+                            </button>
                         </div>
                     </div>
                     <div class="question__content">

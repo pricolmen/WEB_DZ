@@ -1,3 +1,9 @@
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -6,7 +12,7 @@ from django.core.paginator import Paginator
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from .models import Question, Tag, Answer, Profile
+from .models import Question, Tag, Answer, Profile, QuestionLike, AnswerLike
 from .forms import (
     CustomUserCreationForm, 
     CustomAuthenticationForm,
@@ -32,6 +38,10 @@ def index(request):
     
     page_obj = paginate(questions, request)
     
+    for question in page_obj:
+        question.user_vote = question.get_user_vote(request.user) if request.user.is_authenticated else 0
+
+
     return render(request, 'index.html', {
         'page_obj': page_obj,
         'current_sort': sort_type
@@ -62,19 +72,41 @@ def questions_by_tag(request, tag_name):
 # Страница вопроса
 def question_detail(request, question_id):
     question = get_object_or_404(Question, id=question_id)
-    
-    # Получаем ВСЕ ответы на вопрос
+
     all_answers = Answer.objects.filter(question=question).order_by('-rating', '-created_at')
-    
-    # Пагинируем ответы (например, по 10 на страницу)
+
     page_obj = paginate(all_answers, request, per_page=10)
+
+    question_user_vote = 0
+    if request.user.is_authenticated:
+        user_like = QuestionLike.objects.filter(
+            user=request.user,
+            question=question
+        ).first()
+        if user_like:
+            question_user_vote = user_like.value
     
-    # Форма для ответа (только для авторизованных)
+    answers_with_votes = []
+    for answer in page_obj:
+        answer_user_vote = 0
+        if request.user.is_authenticated:
+            user_answer_like = AnswerLike.objects.filter(
+                user=request.user,
+                answer=answer
+            ).first()
+            if user_answer_like:
+                answer_user_vote = user_answer_like.value
+        
+        answer.user_vote = answer_user_vote
+        answers_with_votes.append(answer)
+    
     answer_form = AnswerForm() if request.user.is_authenticated else None
     
     return render(request, 'question.html', {
         'question': question,
-        'page_obj': page_obj,  # Теперь это пагинированные ответы
+        'page_obj': page_obj,
+        'answers_with_votes': answers_with_votes,
+        'question_user_vote': question_user_vote,
         'answer_form': answer_form
     })
 
@@ -99,8 +131,7 @@ def signup_view(request):
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('index')
-    
-    # Получаем URL для редиректа после входа
+
     next_url = request.GET.get('next', '')
     
     if request.method == 'POST':
@@ -132,15 +163,13 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.info(request, 'Вы вышли из системы.')
-    # Возвращаем на ту же страницу, откуда вышли
     return redirect(request.META.get('HTTP_REFERER', 'index'))
 
 # Просмотр профиля
 @login_required
 def profile_view(request):
     profile = get_object_or_404(Profile, user=request.user)
-    
-    # Получаем вопросы и ответы пользователя
+
     user_questions = Question.objects.filter(author=request.user).order_by('-created_at')[:10]
     user_answers = Answer.objects.filter(author=request.user).order_by('-created_at')[:10]
     
@@ -167,7 +196,7 @@ def profile_edit(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Профиль успешно обновлен!')
-            return redirect('profile_view')
+            return redirect('profile')
     else:
         form = ProfileEditForm(instance=profile, user=request.user)
     
@@ -213,7 +242,6 @@ def ask_question(request):
     
     return render(request, 'ask.html', {'form': form})
 
-# Добавление ответа
 @login_required  
 def add_answer(request, question_id):
     question = get_object_or_404(Question, id=question_id)
@@ -227,14 +255,192 @@ def add_answer(request, question_id):
             answer.save()
             
             messages.success(request, 'Ответ добавлен!')
-            
-            # Простой редирект на страницу вопроса
-            # Новый ответ будет на первой странице (самые свежие/с высоким рейтингом)
+
             return HttpResponseRedirect(
                 f"{reverse('question', args=[question_id])}#answer-{answer.id}"
             )
     
     return redirect('question', question_id=question_id)
+
+
+@login_required
+@require_POST
+@ensure_csrf_cookie
+def like_question(request):
+    try:
+        if request.content_type != 'application/json':
+            return JsonResponse({
+                'error': 'Content-Type must be application/json'
+            }, status=400)
+
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        
+        question_id = data.get('question_id')
+        value = data.get('value')
+
+        if not question_id:
+            return JsonResponse({'error': 'Missing question_id'}, status=400)
+        if value is None:
+            return JsonResponse({'error': 'Missing value'}, status=400)
+        
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Value must be an integer'}, status=400)
+        
+        if value not in [1, -1]:
+            return JsonResponse({'error': 'Value must be 1 or -1'}, status=400)
+
+        try:
+            question = Question.objects.get(id=question_id)
+        except Question.DoesNotExist:
+            return JsonResponse({'error': 'Question not found'}, status=404)
+
+        if question.author == request.user:
+            return JsonResponse({'error': 'Cannot like your own question'}, status=403)
+
+        existing_like = QuestionLike.objects.filter(
+            user=request.user,
+            question=question
+        ).first()
+        
+        user_vote = 0
+        
+        if existing_like:
+            if existing_like.value == value:
+                existing_like.delete()
+                user_vote = 0
+            else:
+                existing_like.value = value
+                existing_like.save()
+                user_vote = value
+        else:
+            QuestionLike.objects.create(
+                user=request.user,
+                question=question,
+                value=value
+            )
+            user_vote = value
+
+        question.update_rating()
+        
+        return JsonResponse({
+            'success': True,
+            'rating': question.rating,
+            'user_vote': user_vote
+        })
+        
+    except Exception as e:
+        print(f"Exception in like_question: {str(e)}")
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+
+@login_required
+@require_POST
+@ensure_csrf_cookie
+def like_answer(request):
+    try:
+        if request.content_type != 'application/json':
+            return JsonResponse({
+                'error': 'Content-Type must be application/json'
+            }, status=400)
+        
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        
+        answer_id = data.get('answer_id')
+        value = data.get('value')
+        
+        if not answer_id:
+            return JsonResponse({'error': 'Missing answer_id'}, status=400)
+        if value is None:
+            return JsonResponse({'error': 'Missing value'}, status=400)
+        
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Value must be an integer'}, status=400)
+        
+        if value not in [1, -1]:
+            return JsonResponse({'error': 'Value must be 1 or -1'}, status=400)
+        
+        try:
+            answer = Answer.objects.get(id=answer_id)
+        except Answer.DoesNotExist:
+            return JsonResponse({'error': 'Answer not found'}, status=404)
+        
+        if answer.author == request.user:
+            return JsonResponse({'error': 'Cannot like your own answer'}, status=403)
+
+        existing_like = AnswerLike.objects.filter(
+            user=request.user,
+            answer=answer
+        ).first()
+        
+        user_vote = 0
+        
+        if existing_like:
+            if existing_like.value == value:
+                existing_like.delete()
+                user_vote = 0
+            else:
+                existing_like.value = value
+                existing_like.save()
+                user_vote = value
+        else:
+            AnswerLike.objects.create(
+                user=request.user,
+                answer=answer,
+                value=value
+            )
+            user_vote = value
+        
+        answer.update_rating()
+        
+        return JsonResponse({
+            'success': True,
+            'rating': answer.rating,
+            'user_vote': user_vote
+        })
+        
+    except Exception as e:
+        print(f"Exception in like_answer: {str(e)}")
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+@login_required
+@require_POST
+def mark_correct_answer(request):
+    try:
+        data = json.loads(request.body)
+        question_id = data.get('question_id')
+        answer_id = data.get('answer_id')
+        
+        question = get_object_or_404(Question, id=question_id)
+        answer = get_object_or_404(Answer, id=answer_id, question=question)
+
+        if question.author != request.user:
+            return JsonResponse({'error': 'Only question author can mark correct answer'}, status=403)
+
+        if answer.question != question:
+            return JsonResponse({'error': 'Answer does not belong to this question'}, status=400)
+
+        Answer.objects.filter(question=question).update(is_correct=False)
+        
+        answer.is_correct = True
+        answer.save()
+        
+        return JsonResponse({
+            'success': True,
+            'answer_id': answer.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 def custom_404(request, exception):
     return render(request, '404.html', {"exception": exception}, status=404)

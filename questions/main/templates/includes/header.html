@@ -20,15 +20,32 @@
             <div class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                 <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                        <img src="{% static 'components/user-profile-pic.webp' %}" class="rounded-circle me-1" alt="Аватар">
-                        {{ user.username }}
+                    <a href="#" class="nav-link dropdown-toggle text-white d-flex align-items-center" 
+                       data-bs-toggle="dropdown">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" 
+                                 class="rounded-circle me-2" 
+                                 width="32" height="32"
+                                 style="object-fit: cover;"
+                                 alt="{{ user.username }}">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-2"
+                                 style="width: 32px; height: 32px;">
+                                <span class="text-white small">{{ user.username|first|upper }}</span>
+                            </div>
+                        {% endif %}
+                        <span>{{ user.profile.nickname|default:user.username }}</span>
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{% url 'profile' %}">Мой профиль</a></li>
-                        <li><a class="dropdown-item" href="{% url 'profile' %}">Настройки</a></li>
+                        <li><a class="dropdown-item" href="{% url 'profile_edit' %}">Редактировать</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{% url 'logout' %}">Выйти</a></li>
+                        <li>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item">Выйти</button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
                 {% else %}
@@ -43,3 +60,4 @@
         </div>
     </div>
 </nav>
+
