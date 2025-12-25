@@ -9,12 +9,30 @@
         <main class="col-lg-9">
             <!-- Вопрос -->
             <div class="question__root mb-4">
-                <div class="question__aside">
-                    <img src="{% static 'components/user-profile-pic.webp' %}" alt="pic" class="question__image">
+                <div class="question__aside" style="min-width: 100px">
+                    {% if question.author.profile.avatar %}
+                        <img src="{{ question.author.profile.avatar.url }}" alt="{{ question.author.username }}" class="question__image">
+                    {% else %}
+                        <img src="{% static 'components/user-profile-pic.webp' %}" alt="pic" class="question__image">
+                    {% endif %}
+                    
+                    <!-- Лайки вопроса -->
                     <div class="question__votes d-flex justify-content-center align-items-center gap-2">
-                        <button class="btn btn-sm btn-outline-success">▲</button>
-                        <span class="vote-count">{{ question.rating }}</span>
-                        <button class="btn btn-sm btn-outline-danger">▼</button>
+                        <button class="btn btn-sm btn-outline-success like-btn" 
+                                data-type="question" 
+                                data-id="{{ question.id }}"
+                                data-value="1"
+                                {% if not user.is_authenticated or user == question.author %}disabled{% endif %}>
+                            ▲
+                        </button>
+                        <span class="vote-count" id="question-rating-{{ question.id }}">{{ question.rating }}</span>
+                        <button class="btn btn-sm btn-outline-danger dislike-btn"
+                                data-type="question"
+                                data-id="{{ question.id }}"
+                                data-value="-1"
+                                {% if not user.is_authenticated or user == question.author %}disabled{% endif %}>
+                            ▼
+                        </button>
                     </div>
                 </div>
                 <div class="question__content">
@@ -22,52 +40,125 @@
                     <p class="question__description">{{ question.content|linebreaks }}</p>
                     <div class="question__tags mb-3">
                         {% for tag in question.tags.all %}
-                        <a href="{% url 'questions_by_tag' tag %}" class="badge bg-primary">{{ tag.name }}</a>
+                        <a href="{% url 'questions_by_tag' tag.name %}" class="badge bg-primary">{{ tag.name }}</a>
                         {% endfor %}
                     </div>
                     <small class="text-muted">
-                        Задан {{ question.created_at|timesince }} назад пользователем {{ question.author.username }}
+                        Задан {{ question.created_at|timesince }} назад пользователем 
+                        <a href="{% url 'user_profile' question.author.username %}">
+                            {{ question.author.username }}
+                        </a>
                     </small>
                 </div>
             </div>
 
             <!-- Ответы -->
             <h3>Ответы ({{ page_obj.paginator.count }})</h3>
+            
             {% for answer in page_obj %}
-            <div class="question__root mb-3">
-                <div class="question__aside">
-                    <img src="{% static 'components/user-profile-pic.webp' %}" alt="Аватар" class="question__image">
+            <div class="question__root mb-3" id="answer-{{ answer.id }}">
+                <div class="question__aside" style="min-width: 100px">
+                    {% if answer.author.profile.avatar %}
+                        <img src="{{ answer.author.profile.avatar.url }}" alt="{{ answer.author.username }}" class="question__image">
+                    {% else %}
+                        <img src="{% static 'components/user-profile-pic.webp' %}" alt="Аватар" class="question__image">
+                    {% endif %}
+                    
+                    <!-- Лайки ответа -->
                     <div class="question__votes d-flex justify-content-center align-items-center gap-2">
-                        <button class="btn btn-sm btn-outline-success">▲</button>
-                        <span class="vote-count">{{ answer.rating }}</span>
-                        <button class="btn btn-sm btn-outline-danger">▼</button>
+                        <button class="btn btn-sm btn-outline-success like-btn"
+                                data-type="answer"
+                                data-id="{{ answer.id }}"
+                                data-value="1"
+                                {% if not user.is_authenticated or user == answer.author %}disabled{% endif %}>
+                            ▲
+                        </button>
+                        <span class="vote-count" id="answer-rating-{{ answer.id }}">{{ answer.rating }}</span>
+                        <button class="btn btn-sm btn-outline-danger dislike-btn"
+                                data-type="answer"
+                                data-id="{{ answer.id }}"
+                                data-value="-1"
+                                {% if not user.is_authenticated or user == answer.author %}disabled{% endif %}>
+                            ▼
+                        </button>
                     </div>
                 </div>
                 <div class="question__content">
                     <p class="question__description">{{ answer.content|linebreaks }}</p>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="checkbox1">
-                        <label class="form-check-label" for="checkbox1">
-                            Правильный ответ
-                        </label>
+                    
+                    <!-- Галочка правильный ответ -->
+                    <div class="form-check mb-2">
+                        {% if user == question.author %}
+                            <input type="checkbox" 
+                                   class="form-check-input correct-answer-checkbox"
+                                   data-question-id="{{ question.id }}"
+                                   data-answer-id="{{ answer.id }}"
+                                   id="correct-{{ answer.id }}"
+                                   {% if answer.is_correct %}checked{% endif %}>
+                            <label class="form-check-label" for="correct-{{ answer.id }}">
+                                Правильный ответ
+                            </label>
+                        {% else %}
+                            {% if answer.is_correct %}
+                                <span class="badge bg-success">✓ Правильный ответ</span>
+                            {% endif %}
+                        {% endif %}
                     </div>
+                    
                     <small class="text-muted">
-                        Ответ дан {{ answer.created_at|timesince }} назад пользователем {{ answer.author.username }}
+                        Ответ дан {{ answer.created_at|timesince }} назад пользователем 
+                        <a href="{% url 'user_profile' answer.author.username %}">
+                            {{ answer.author.username }}
+                        </a>
                     </small>
                 </div>
             </div>
             {% endfor %}
+        
+
+            <!-- Пагинация ответов -->
+            {% if page_obj.has_other_pages %}
+            <div class="pagination mt-4 d-flex align-items-center justify-content-center gap-3">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}#answers" class="btn btn-outline-primary">« Назад</a>
+                {% endif %}
+
+                <span class="">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}#answers" class="btn btn-outline-primary">Дальше »</a>
+                {% endif %}
+            </div>
+            {% endif %}
 
             <!-- Форма ответа -->
+            {% if user.is_authenticated %}
             <div class="card mt-4">
                 <div class="card-body">
-                    <h5>Ваш ответ</h5>
-                    <form>
-                        <textarea class="form-control mb-3" rows="5" placeholder="Введите ваш ответ..."></textarea>
-                        <button type="submit" class="btn btn-primary">Отправить ответ</button>
+                    <h5 class="card-title">Добавить ответ</h5>
+                    <form method="post" action="{% url 'add_answer' question.id %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            {{ answer_form.content }}
+                            {% if answer_form.content.errors %}
+                                <div class="text-danger">
+                                    {% for error in answer_form.content.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Ответить</button>
                     </form>
                 </div>
             </div>
+            {% else %}
+            <div class="alert alert-info mt-4">
+                <a href="{% url 'login' %}?next={{ request.path }}">Войдите</a>, чтобы отвевать на вопросы.
+            </div>
+            {% endif %}
         </main>
 
         <aside class="col-lg-3">

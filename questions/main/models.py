@@ -11,6 +11,7 @@ class Profile(models.Model):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     rating = models.IntegerField(default=0)  # Добавляем рейтинг
     answers_count = models.IntegerField(default=0)  # Добавляем количество ответов
+    nickname = models.CharField(max_length=50, blank=True, null=True)
     
     def __str__(self):
         return f"Profile of {self.user.username} - Rating: {self.rating}"
@@ -25,6 +26,11 @@ class Profile(models.Model):
         self.rating = answers_rating
         self.save()
         return self.rating
+    
+    def save(self, *args, **kwargs):
+        if not self.nickname:
+            self.nickname = self.user.username
+        super().save(*args, **kwargs)
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -58,8 +64,16 @@ class Question(models.Model):
     
     def update_rating(self):
         likes = QuestionLike.objects.filter(question=self)
-        self.rating = sum(like.value for like in likes)
+        total = sum(like.value for like in likes)  # 1 или -1
+        self.rating = total
         self.save()
+        return self.rating
+    
+    def get_user_vote(self, user):
+        if user.is_authenticated:
+            like = QuestionLike.objects.filter(question=self, user=user).first()
+            return like.value if like else 0
+        return 0
     
     def get_absolute_url(self):
         return f"/question/{self.id}/"
@@ -77,8 +91,16 @@ class Answer(models.Model):
     
     def update_rating(self):
         likes = AnswerLike.objects.filter(answer=self)
-        self.rating = sum(like.value for like in likes)
+        total = sum(like.value for like in likes)
+        self.rating = total
         self.save()
+        return self.rating
+    
+    def get_user_vote(self, user):
+        if user.is_authenticated:
+            like = AnswerLike.objects.filter(answer=self, user=user).first()
+            return like.value if like else 0
+        return 0
 
 class QuestionLike(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -158,14 +180,11 @@ def update_user_profile_rating(sender, instance, **kwargs):
             author=user
         ).aggregate(total=Sum('rating'))['total'] or 0
         
-        # Считаем количество ответов
         answers_count = Answer.objects.filter(author=user).count()
-        
-        # Обновляем профиль
+
         profile.rating = question_rating + answer_rating
         profile.answers_count = answers_count
         profile.save()
         
     except Profile.DoesNotExist:
-        # Создаем профиль, если его нет
         Profile.objects.create(user=user)

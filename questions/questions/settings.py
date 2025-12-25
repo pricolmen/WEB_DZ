@@ -175,3 +175,12 @@ if DEBUG:
     import socket
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
+
+
+# Медиа файлы
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+if not os.path.exists(os.path.join(MEDIA_ROOT, 'avatars')):
+    os.makedirs(os.path.join(MEDIA_ROOT, 'avatars'))

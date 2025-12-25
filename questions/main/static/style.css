@@ -66,18 +66,18 @@ img {
     align-items: center;
     gap: 24px;
 
-    max-width: 720px;
+    width: 720px;
             
 }
 
 .question__aside{
-    max-width: fit-content;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-self: flex-start;
     align-items: center;
     height: 160px;
+    min-width: 100px;
 }
 
 
@@ -104,4 +104,10 @@ img {
 
 .min-vh-100 {
     min-height: 100vh;
+}
+
+
+.profile-avatar{
+    width: 150px;
+    height: 150px;
 }

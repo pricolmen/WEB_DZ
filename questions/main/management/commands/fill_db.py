@@ -98,7 +98,7 @@ class Command(BaseCommand):
                     title=fake.sentence()[:200],
                     content=fake.text(max_nb_chars=1000),
                     author_id=random.choice(user_ids),
-                    rating=random.randint(0, 100)
+                    rating=0
                 ))
                 
                 if (i + 1) % 5000 == 0:
@@ -136,7 +136,7 @@ class Command(BaseCommand):
                     content=fake.text(max_nb_chars=500),
                     author_id=random.choice(user_ids),
                     question_id=random.choice(question_ids),
-                    rating=random.randint(0, 50)
+                    rating=0
                 ))
                 
                 if (i + 1) % 10000 == 0:
